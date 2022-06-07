@@ -35,25 +35,48 @@ func New() *Engine {
 	return engine
 }
 
+func (group *RouterGroup) handlerIsNil() HandlerFunc {
+	return func(context *Context) {
+		context.JSON(http.StatusOK, H{
+			"message": "操作成功",
+		})
+	}
+}
 
 // GET defines the method to add GET request
-func (group *RouterGroup) GET(pattern string, handler HandlerFunc) {
-	group.addRoute("GET", pattern, handler)
+func (group *RouterGroup) GET(pattern string, handler ...HandlerFunc) {
+	if len(handler) == 0 {
+		group.addRoute("GET", pattern, group.handlerIsNil())
+		return
+	}
+	group.addRoute("GET", pattern, handler[0])
 }
 
 // POST defines the method to add POST request
-func (group *RouterGroup) POST(pattern string, handler HandlerFunc) {
-	group.addRoute("POST", pattern, handler)
+func (group *RouterGroup) POST(pattern string, handler ...HandlerFunc) {
+	if len(handler) == 0 {
+		group.addRoute("POST", pattern, group.handlerIsNil())
+		return
+	}
+	group.addRoute("POST", pattern, handler[0])
 }
 
 // PUT defines the method to add PUT request
-func (group *RouterGroup) PUT(pattern string, handler HandlerFunc) {
-	group.addRoute("PUT", pattern, handler)
+func (group *RouterGroup) PUT(pattern string, handler ...HandlerFunc) {
+	if len(handler) == 0 {
+		group.addRoute("PUT", pattern, group.handlerIsNil())
+		return
+	}
+	group.addRoute("PUT", pattern, handler[0])
 }
 
 // DELETE defines the method to add DELETE request
-func (group *RouterGroup) DELETE(pattern string, handler HandlerFunc) {
-	group.addRoute("DELETE", pattern, handler)
+func (group *RouterGroup) DELETE(pattern string, handler ...HandlerFunc) {
+	if len(handler) == 0 {
+		group.addRoute("DELETE", pattern, group.handlerIsNil())
+		return
+	}
+	group.addRoute("DELETE", pattern, handler[0])
 }
 
 // Group is defined to create a new RouterGroup

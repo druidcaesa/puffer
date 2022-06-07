@@ -3,6 +3,7 @@ package puffer
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/druidcaesa/puffer/cookie"
 	"github.com/druidcaesa/puffer/utils"
 	"net/http"
 )
@@ -10,8 +11,10 @@ import (
 type H map[string]interface{}
 
 type ContextFunc interface {
-	BindQuery(v interface{}) interface{}
-	BindJsonBody(v interface{}) interface{}
+	BindQuery(v interface{}) (bool, error)
+	BindJsonBody(v interface{}) (bool, error)
+	GetCookie(key string) (*http.Cookie, error)
+	SetCookie(key, value, path, domain string, maxAge int, secure, httpOnly bool)
 }
 
 type Context struct {
@@ -29,6 +32,7 @@ type Context struct {
 	index    int
 	engine   *Engine
 	tagUtils utils.Tag
+	Cookie   cookie.Cookie
 }
 
 func newContext(w http.ResponseWriter, req *http.Request) *Context {
@@ -105,13 +109,35 @@ func (c *Context) HTML(code int, name string, data interface{}) {
 }
 
 // BindQuery Get request parameter binding
-func (c *Context) BindQuery(v interface{}) interface{} {
-	v = c.tagUtils.BindForm(v)
-	return v
+func (c *Context) BindQuery(v interface{}) (bool, error) {
+	c.tagUtils.R = c.Req
+	return c.tagUtils.BindForm(v)
 }
 
 // BindJsonBody JSON parameter binding for POST
-func (c *Context) BindJsonBody(v interface{}) interface{} {
-	v = c.tagUtils.BindJson(v)
-	return v
+func (c *Context) BindJsonBody(v interface{}) (bool, error) {
+	c.tagUtils.R = c.Req
+	return c.tagUtils.BindJson(v)
+}
+
+// GetCookie get cookie
+func (c *Context) GetCookie(key string) (*http.Cookie, error) {
+	c.Cookie.SetReq(c.Req)
+	return c.Cookie.Cookie(key)
+}
+
+/**
+ * @author fanyanan
+ * @description set cookie function
+ * @date 14:11 2022/6/7
+ * @param key cookie key
+ * @param value cookie value
+ * @param domain domain name
+ * @param maxAge Maximum aging unit second
+ * @param secure Can it be accessed via https
+ * @param httpOnly Whether to allow js to get
+ **/
+func (c *Context) SetCookie(key, value, path, domain string, maxAge int, secure, httpOnly bool) {
+	c.Cookie.SetResp(c.Writer)
+	c.Cookie.SetCookie(key, value, path, domain, maxAge, secure, httpOnly)
 }
