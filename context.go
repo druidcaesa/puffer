@@ -3,10 +3,16 @@ package puffer
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/druidcaesa/puffer/utils"
 	"net/http"
 )
 
 type H map[string]interface{}
+
+type ContextFunc interface {
+	BindQuery(v interface{}) interface{}
+	BindJsonBody(v interface{}) interface{}
+}
 
 type Context struct {
 	// origin objects
@@ -95,4 +101,16 @@ func (c *Context) HTML(code int, name string, data interface{}) {
 	if err := c.engine.htmlTemplates.ExecuteTemplate(c.Writer, name, data); err != nil {
 		c.Fail(500, err.Error())
 	}
+}
+
+// BindQuery Get request parameter binding
+func (c *Context) BindQuery(v interface{}) interface{} {
+	v = utils.BindQuery(c, v)
+	return v
+}
+
+// BindJsonBody JSON parameter binding for POST
+func (c *Context) BindJsonBody(v interface{}) interface{} {
+	v = utils.BindQuery(c, v)
+	return v
 }
