@@ -15,6 +15,8 @@ type ContextFunc interface {
 	BindJsonBody(v interface{}) (bool, error)
 	GetCookie(key string) (*http.Cookie, error)
 	SetCookie(key, value, path, domain string, maxAge int, secure, httpOnly bool)
+	GetQuery(key string) string
+	GetParameter(key string) string
 }
 
 type Context struct {
@@ -124,6 +126,28 @@ func (c *Context) BindJsonBody(v interface{}) (bool, error) {
 func (c *Context) GetCookie(key string) (*http.Cookie, error) {
 	c.Cookie.SetReq(c.Req)
 	return c.Cookie.Cookie(key)
+}
+
+/**
+ * @author fanyanan
+ * @description //GetQuery Get Get request parameters
+ * @date 16:35 2022/6/7
+ * @param key parameter key
+ * @return string
+ **/
+func (c *Context) GetQuery(key string) string {
+	return c.Req.URL.Query().Get(key)
+}
+
+/**
+ * @author fanyanan
+ * @description //Get dynamic request parameters
+ * @date 16:37 2022/6/7
+ * @param Dynamic request parameter key
+ * @return string
+ **/
+func (c *Context) GetParameter(key string) string {
+	return c.Params[key]
 }
 
 /**
