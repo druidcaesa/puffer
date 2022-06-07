@@ -28,6 +28,7 @@ type Context struct {
 	handlers []HandlerFunc
 	index    int
 	engine   *Engine
+	tagUtils utils.Tag
 }
 
 func newContext(w http.ResponseWriter, req *http.Request) *Context {
@@ -105,12 +106,12 @@ func (c *Context) HTML(code int, name string, data interface{}) {
 
 // BindQuery Get request parameter binding
 func (c *Context) BindQuery(v interface{}) interface{} {
-	v = utils.BindQuery(c, v)
+	v = c.tagUtils.BindForm(v)
 	return v
 }
 
 // BindJsonBody JSON parameter binding for POST
 func (c *Context) BindJsonBody(v interface{}) interface{} {
-	v = utils.BindQuery(c, v)
+	v = c.tagUtils.BindJson(v)
 	return v
 }
