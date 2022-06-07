@@ -4,19 +4,31 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/druidcaesa/puffer/cookie"
+	"github.com/druidcaesa/puffer/file"
 	"github.com/druidcaesa/puffer/utils"
+	"log"
 	"net/http"
 )
 
 type H map[string]interface{}
 
 type ContextFunc interface {
+	// BindQuery Get Get request parameters binding struct
 	BindQuery(v interface{}) (bool, error)
+	// BindJsonBody Get POST request parameters
 	BindJsonBody(v interface{}) (bool, error)
+	// GetCookie Get cookie
 	GetCookie(key string) (*http.Cookie, error)
+	// SetCookie set cookies
 	SetCookie(key, value, path, domain string, maxAge int, secure, httpOnly bool)
+	// GetQuery Get Get request parameters
 	GetQuery(key string) string
+	// GetParameter Get dynamic route URI parameters
 	GetParameter(key string) string
+	// GetPostForm Get form submission data
+	GetPostForm(key string) string
+	// FormFile Get File Upload
+	FormFile(fileKey string) (*file.File, error)
 }
 
 type Context struct {
@@ -164,4 +176,32 @@ func (c *Context) GetParameter(key string) string {
 func (c *Context) SetCookie(key, value, path, domain string, maxAge int, secure, httpOnly bool) {
 	c.Cookie.SetResp(c.Writer)
 	c.Cookie.SetCookie(key, value, path, domain, maxAge, secure, httpOnly)
+}
+
+// GetPostForm get post form request parameters
+// params key request parameters key
+func (c *Context) GetPostForm(key string) string {
+	r := c.Req
+	err := r.ParseForm()
+	if err != nil {
+		log.Fatalf("An exception occurs----->%s", err.Error())
+		return ""
+	}
+	for k, v := range r.Form {
+		if k == key {
+			return v[0]
+		}
+	}
+	return ""
+}
+
+// FormFile Get Upload File
+func (c *Context) FormFile(fileKey string) (*file.File, error) {
+	f := new(file.File)
+	f.SetReq(c.Req)
+	formFile, err := f.GetFormFile(fileKey)
+	if err != nil {
+		return nil, err
+	}
+	return formFile, nil
 }
