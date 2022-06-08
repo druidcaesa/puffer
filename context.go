@@ -45,7 +45,6 @@ type Context struct {
 	handlers []HandlerFunc
 	index    int
 	engine   *Engine
-	tagUtils utils.Tag
 	Cookie   cookie.Cookie
 }
 
@@ -124,14 +123,16 @@ func (c *Context) HTML(code int, name string, data interface{}) {
 
 // BindQuery Get request parameter binding
 func (c *Context) BindQuery(v interface{}) (bool, error) {
-	c.tagUtils.R = c.Req
-	return c.tagUtils.BindForm(v)
+	u := new(utils.Tag)
+	u.R = c.Req
+	return u.BindForm(v)
 }
 
 // BindJsonBody JSON parameter binding for POST
 func (c *Context) BindJsonBody(v interface{}) (bool, error) {
-	c.tagUtils.R = c.Req
-	return c.tagUtils.BindJson(v)
+	u := new(utils.Tag)
+	u.R = c.Req
+	return u.BindJson(v)
 }
 
 // GetCookie get cookie
