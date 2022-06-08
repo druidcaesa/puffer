@@ -255,10 +255,72 @@ func login(c *puffer.Context) {
 ```
 ![请求结果](http://39.105.57.46:9000/cloud-disk/WX20220607-164541@2x.png)
 
+###### 3、获取表单提交数据
+```go
+package main
+
+import (
+	"github.com/druidcaesa/puffer"
+	"log"
+	"net/http"
+)
+
+func main() {
+	engine := puffer.Default()
+	engine.POST("/testForm", func(c *puffer.Context) {
+		//获取表单提交数据
+		userName := c.GetPostForm("userName")
+		log.Printf("表单提交数据为------->%s",userName)
+		c.JSON(http.StatusOK,puffer.H{
+			"message": userName,
+		})
+	})
+	engine.Run(":8080")
+}
+
+```
+
+```shell
+2022/06/08 09:31:09 表单提交数据为------->张三
+2022/06/08 09:31:09 [200] /testForm in 100.905µs
+```
+
+###### 4、文件上传
+```go
+package main
+
+import (
+	"github.com/druidcaesa/puffer"
+	"log"
+)
+
+func main() {
+	engine := puffer.Default()
+	engine.POST("/upload", func(c *puffer.Context) {
+		file, err := c.FormFile("file")
+		if err != nil {
+			return
+		}
+		log.Printf("获取到的文件名称--------------->%s",file.Filename)
+		log.Printf("获取到的文件大小--------------->%d",file.Size)
+		log.Printf("获取到的文件类型--------------->%T",file.File)
+	})
+	engine.Run(":8080")
+}
+```
+````shell
+2022/06/08 09:34:01 Route POST - /upload
+2022/06/08 09:34:29 获取到的文件名称--------------->monkey-admin.sql
+2022/06/08 09:34:29 获取到的文件大小--------------->40011
+2022/06/08 09:34:29 获取到的文件类型--------------->*multipart.File
+````
+
+
+
 
 ##### 4、中间件
 
-##### 1、创建中间件
+###### 1、创建中间件
 
 ```go
 /**
@@ -286,7 +348,7 @@ func Logger() puffer.HandlerFunc {
 }
 ```
 
-##### 2、中间件注册
+###### 2、中间件注册
 
 ```go
 package main
@@ -331,4 +393,6 @@ func getInfo(c *puffer.Context) {
 }
 ```
 ![请求结果](http://39.105.57.46:9000/cloud-disk/WX20220607-170843@2x.png)
+
+
 

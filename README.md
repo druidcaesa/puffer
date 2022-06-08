@@ -255,10 +255,71 @@ func login(c *puffer.Context) {
 ```
 ![请求结果](http://39.105.57.46:9000/cloud-disk/WX20220607-164541@2x.png)
 
+###### 3、Get form submission data
+```go
+package main
+
+import (
+	"github.com/druidcaesa/puffer"
+	"log"
+	"net/http"
+)
+
+func main() {
+	engine := puffer.Default()
+	engine.POST("/testForm", func(c *puffer.Context) {
+		//Get form submission data
+		userName := c.GetPostForm("userName")
+		log.Printf("The form submit data is------->%s",userName)
+		c.JSON(http.StatusOK,puffer.H{
+			"message": userName,
+		})
+	})
+	engine.Run(":8080")
+}
+
+```
+
+```shell
+2022/06/08 09:31:09 The form submit data is------->张三
+2022/06/08 09:31:09 [200] /testForm in 100.905µs
+```
+
+###### 4、File Upload
+```go
+package main
+
+import (
+	"github.com/druidcaesa/puffer"
+	"log"
+)
+
+func main() {
+	engine := puffer.Default()
+	engine.POST("/upload", func(c *puffer.Context) {
+		file, err := c.FormFile("file")
+		if err != nil {
+			return
+		}
+		log.Printf("Obtained file name--------------->%s",file.Filename)
+		log.Printf("Obtained file size--------------->%d",file.Size)
+		log.Printf("Obtained file type--------------->%T",file.File)
+	})
+	engine.Run(":8080")
+}
+```
+````shell
+2022/06/08 09:34:01 Route POST - /upload
+2022/06/08 09:34:29 Obtained file name--------------->monkey-admin.sql
+2022/06/08 09:34:29 Obtained file size--------------->40011
+2022/06/08 09:34:29 Obtained file type--------------->*multipart.File
+````
+
+
 
 ##### 4、middleware
 
-##### 1、Create middleware
+###### 1、Create middleware
 
 ```go
 /**
@@ -286,7 +347,7 @@ func Logger() puffer.HandlerFunc {
 }
 ```
 
-##### 2、Middleware registration
+###### 2、Middleware registration
 
 ```go
 package main
